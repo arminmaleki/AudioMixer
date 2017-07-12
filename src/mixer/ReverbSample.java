@@ -33,7 +33,7 @@ public class ReverbSample extends Gain{
 
 		    Glide randomnessValue = new Glide(ac, 0.8f, 10);
 		    Glide  intervalValue = new Glide(ac, 100, 100);
-		    Glide  grainSizeValue = new Glide(ac,2000, 20);
+		    Glide  grainSizeValue = new Glide(ac,2000, 70);
 		    Glide  positionValue = new Glide(ac, 5000+(float)Math.random()*4000-2000, 30);
 		    Glide  pitchValue = new Glide(ac, (float) Math.exp((0-5-0.0+12)/12.0*Math.log(2)), 400);//
 	     pitchValue.setValue(1.0f);
