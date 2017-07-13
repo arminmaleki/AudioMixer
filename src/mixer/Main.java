@@ -119,21 +119,26 @@ public class Main {
 						SamplePlayer sp=new SamplePlayer(ac, allSamples[rand]);
 						Glide pitch=new Glide(ac,0.8f+(float)(Math.random()*0.4),100);
 						sp.setPitch(pitch);
-						Gain g;
+						final Gain g;
 						if (rand<10)  g=new Gain(ac,2,outSampleVolume);
 
 						else g=new Gain(ac,2,inSampleVolume);
 
 						g.addInput(sp);
-						Function spGainReg=new Function(g){
+						final Function spGainReg=new Function(g){
 
 							@Override
 							public float calculate() {return (float)Math.tanh(x[0]*1.8);}};
+							sp.setKillListener(new Bead(){public void messageReceived(Bead message){
+								g.kill();
+								spGainReg.kill();
+							}});
 							Master.addInput(spGainReg);
 							sp.start();
 
 							System.out.println("new sp "+ rand);
 					}}
+				
 
 			}
 		});
