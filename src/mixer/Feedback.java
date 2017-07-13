@@ -8,12 +8,12 @@ import net.beadsproject.beads.ugens.TapIn;
 import net.beadsproject.beads.ugens.TapOut;
 
 public class Feedback extends net.beadsproject.beads.ugens.Gain {
-	//AudioContext ac;
+	//AudioContext a
 	public Glide sw;
-	public float level=0;
+	public float level=0.1f;
 	public Gain rev2;
-public Feedback(AudioContext ac){super(ac,2,0.9f);
-sw=new Glide(ac,-1f,200);    
+public Feedback(AudioContext ac){super(ac,2,0.75f);
+sw=new Glide(ac,-0.5f,200);    
 Function soovich=new Function (sw){
 
 	@Override
@@ -39,13 +39,13 @@ Function sGain=new Function(soovich){
 		
 //Gain reduce=new Gain(ac,2,0.3f);
 //Gain thi=new Gain(ac,2,0.9f);
-rev2=new Gain(ac,2,0.3f);
+rev2=new Gain(ac,2,sGain);
 
 //reduce.addInput(sp);
 //rev1.addInput(reduce);
 
 TapIn ti=new TapIn(ac, 1000);
-TapOut to=new TapOut(ac, ti,200);
+TapOut to=new TapOut(ac, ti,sDelay);
 ti.addInput(this);
 rev2.addInput(to);
 this.addInput(rev2);

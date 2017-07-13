@@ -22,7 +22,7 @@ import net.beadsproject.beads.ugens.TapOut;
 public class Main {
 	private static final int howManySamples=45,firstSample=20;
 	private static final String sampleURI="pieces/out";
-	private static final float inSampleVolume=1.5f,outSampleVolume=0.8f,granularVolume=1.0f;
+	private static final float inSampleVolume=1.5f,outSampleVolume=0.8f,granularVolume=1.5f;
 	private static final float beatLength=0.5f;
 
 	private static AudioContext ac=new AudioContext();
@@ -114,22 +114,34 @@ public class Main {
 						}
 
 					}
+					if (c.getBeatCount()%4==0) {
+						if (Math.random()<0.0){
+						fb1.sw.setValue((float)Math.random()*0.2f); System.out.println("SW "+fb1.sw.getValue());}
+						else {fb1.sw.setValue((float)Math.random()*4f+0.25f);}	
+					}
+					
 					if (c.getBeatCount()%6==4){
 						int rand=(int)(Math.random()*20);
 						SamplePlayer sp=new SamplePlayer(ac, allSamples[rand]);
 						Glide pitch=new Glide(ac,0.8f+(float)(Math.random()*0.4),100);
 						sp.setPitch(pitch);
-						Gain g;
+						final Gain g;
 						if (rand<10)  g=new Gain(ac,2,outSampleVolume);
 
 						else g=new Gain(ac,2,inSampleVolume);
 
 						g.addInput(sp);
-						Function spGainReg=new Function(g){
+						
+						final Function spGainReg=new Function(g){
 
 							@Override
 							public float calculate() {return (float)Math.tanh(x[0]*1.8);}};
+							sp.setKillListener(new Bead(){public void messageReceived(Bead message){
+								g.kill();
+								spGainReg.kill();
+							}});
 							Master.addInput(spGainReg);
+							fb1.addInput(spGainReg);
 							sp.start();
 
 							System.out.println("new sp "+ rand);
@@ -149,27 +161,8 @@ public class Main {
 			granularGain.addInput(reverbSample);
 			ac.out.addDependent(c);
 
-			Gain reduce= new Gain(ac,2,0.7f);
-			reduce.addInput(Master);
-			Function redMax=new Function(reduce){
-
-				@Override
-				public float calculate() {
-					// TODO Auto-generated method stub
-					if (x[0]>1) return 1;
-					if (x[0]<-1) return -1;
-					return x[0];
-				}};
-				fb1.addInput(redMax);
-				Function fb1Max=new Function(fb1){
-
-					@Override
-					public float calculate() {
-						// TODO Auto-generated method stub
-						if (x[0]>1) return 1;
-						if (x[0]<-1) return -1;
-						return x[0];
-					}};
+			
+				
 					//    fb1.addInput(redMax);
 					
 
@@ -193,6 +186,38 @@ public class Main {
 						comp.setThreshold(0.4f);
 						comp.addInput(sMax);
 						rts.addInput(comp);
+						
+						
+						//Gain reduce= new Gain(ac,2,0.3f);
+						//reduce.addInput(comp);
+						
+						/////
+					/*	SamplePlayer testSp=null;
+						try {
+							 testSp=new SamplePlayer(ac,new Sample("p.mp3"));
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						//ac.out.addInput(testSp);
+						/////             */
+						
+						//fb1.addInput(redred);
+						
+						Function redfb1=new Function(fb1){
+
+							@Override
+							public float calculate() {
+								// TODO Auto-generated method stub
+								if (x[0]>1) return 1;
+								if (x[0]<-1) return -1;
+								return x[0];
+							}};
+					
+						//Gain somma=new Gain(ac,2,0.3f);
+						//somma.addInput(comp);
+						//somma.addInput(redfb1);
+						ac.out.addInput(redfb1);
 						ac.out.addInput(comp);
 						//  totrts.getSample().clear();
 						//   totalRts.addInput(ac.out);
