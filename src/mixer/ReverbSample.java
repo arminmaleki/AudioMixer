@@ -15,7 +15,7 @@ import net.beadsproject.beads.ugens.TapOut;
 public class ReverbSample extends Gain{
 	public ReverbSample(AudioContext ac,Sample s,Envelope vol){
 		super(ac,2,vol);
-		System.out.println("ReverbSample constructed");
+	//	System.out.println("ReverbSample constructed");
 		
 
 		/* Gain delayGain=new Gain(ac,2,0.2f);

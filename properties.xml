@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+	
+	<wav />
+	
+	<general>
+
+		<tempo beatLength="0.5" metronomBeat="1.0" loadSampleEvery="15"
+			loadSampleOn="7" />
+		<feedback level="0.9" gain="0.75" attack="200" />
+		<volume inSample="0.3" outSample="1.5" granular="2.5" />
+		<sampleNumber out="2" in="1" />
+		<granular cutoff="400" grain="70" />
+
+	</general>
+	<repository name="googoosh" URI="pieces/out" totalSamples="20"
+		firstSample="1" time="30" volume="0.6" />
+	<repository name="dorehaming_ali" URI="pieces/out" totalSamples="40"
+		firstSample="25" time="60" volume="1.0" />
+	<repository name="nardeboon" URI="nardeboon/pieces/out" totalSamples="14"
+		firstSample="1" time="60" volume="1.0" />
+</properties>
