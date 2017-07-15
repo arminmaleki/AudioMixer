@@ -13,6 +13,13 @@ import net.beadsproject.beads.ugens.TapIn;
 import net.beadsproject.beads.ugens.TapOut;
 
 public class ReverbSample extends Gain{
+	OnePoleFilter lowpass;
+	 GranularSamplePlayer gsp;
+	public void kill(){
+		gsp.kill();
+		lowpass.kill();
+		super.kill();
+	}
 	public ReverbSample(AudioContext ac,Sample s,Envelope vol){
 		super(ac,2,vol);
 	//	System.out.println("ReverbSample constructed");
@@ -28,7 +35,7 @@ public class ReverbSample extends Gain{
 		ti.addInput(this);
 		echoGain.addInput(to);
 		  this.addInput(echoGain); */
-		 GranularSamplePlayer gsp = new GranularSamplePlayer(ac, s);
+		  gsp = new GranularSamplePlayer(ac, s);
 
 
 		    Glide randomnessValue = new Glide(ac, 0.8f, 10);
@@ -42,7 +49,7 @@ public class ReverbSample extends Gain{
 		    gsp.setGrainSize(grainSizeValue);
 		    gsp.setPosition(positionValue);
 		    gsp.setPitch(pitchValue);
-		   OnePoleFilter lowpass=new OnePoleFilter(ac, 400);
+		  lowpass=new OnePoleFilter(ac, 400);
 		   lowpass.addInput(gsp);
 		   this.addInput(lowpass);
 	}
