@@ -32,7 +32,7 @@ public class Main {
 	private static  float beatLength=0.5f;
 
 	private static AudioContext ac=new AudioContext();
-	private static Gain Master=new Gain(ac,2,(float) .3);
+	private static Gain Master=new Gain(ac,2,(float) .5);
 	private static ReverbSample reverbSample;
 	private static Sample[] allSamples;
 	private static String[] tagSample;
@@ -54,6 +54,7 @@ public class Main {
 	private static String extension;
 	private static boolean noRealTime;
 	private static float norealTimeTime;
+	private static boolean noFeedback;
 
 	private static void loadSamples() {
 		try {
@@ -80,6 +81,7 @@ public class Main {
 		allSamples=new Sample[inSampleNumber*((fromScratch)?0:1)+outSampleNumber];
 		tagSample=new String[inSampleNumber*((fromScratch)?0:1)+outSampleNumber];
 		loadSamples();
+		Repository.setRandom();
 		Repository.setRandomWithDelay();
 		unit1 u1=new unit1();
 		u1.message(null);
@@ -152,7 +154,9 @@ public class Main {
 					if (c.getBeatCount()%4==0) {
 						if (Math.random()<0.0){
 							fb1.sw.setValue((float)Math.random()*0.2f); System.out.println("SW "+fb1.sw.getValue());}
-						else {fb1.sw.setValue((float)Math.random()*1.6f+0.25f);}	
+						else {fb1.sw.setValue((float)Math.random()*1.6f+0.25f);
+							//fb1.sw.setValue((float)3.0);
+						}	
 					}
 
 					if (c.getBeatCount()%6==4){
@@ -177,7 +181,7 @@ public class Main {
 								spGainReg.kill();
 							}});
 							Master.addInput(spGainReg);
-							fb1.addInput(spGainReg);
+							if (!noFeedback) fb1.addInput(spGainReg);
 							sp.start();
 
 							System.out.println("new Sample "+ rand+" from "+tagSample[rand]);
@@ -253,12 +257,13 @@ public class Main {
 					//Gain somma=new Gain(ac,2,0.3f);
 					//somma.addInput(comp);
 					//somma.addInput(redfb1);
-					ac.out.addInput(redfb1);
+					if (!noFeedback) ac.out.addInput(redfb1);
 					ac.out.addInput(comp);
 					//  totrts.getSample().clear();
 					//   totalRts.addInput(ac.out);
 					//  ac.out.addDependent(totalRts);
 					ac.out.addDependent(rts);
+					//ac.runForNMillisecondsNonRealTime(10000000);
 					if (noRealTime) 	ac.runForNMillisecondsNonRealTime(norealTimeTime*1000); else
 						ac.start();
 					
@@ -284,6 +289,9 @@ public class Main {
 				NodeList noRealTime=doc.getDocumentElement().getElementsByTagName("noRealTime");
 				if (noRealTime.getLength()>0) { Main.noRealTime=true; norealTimeTime=Float.parseFloat(((Element)noRealTime.item(0)).getAttribute("time"));
 						System.out.println("noRealtime time="+norealTimeTime);} else Main.noRealTime=false;
+				NodeList noFeedback=doc.getDocumentElement().getElementsByTagName("noFeedback");
+				if ( noFeedback.getLength()>0) { Main. noFeedback=true;
+						System.out.println("noFeeback");} else Main.noFeedback=false;
 				Element general=  (Element) doc.getDocumentElement().getElementsByTagName("general").item(0);
 				
 				Element elem= (Element) general.getElementsByTagName("tempo").item(0);
@@ -384,7 +392,7 @@ public class Main {
 	 */
 	static class Repository {
 		static public Repository current=null;
-
+        static private Clock  c;
 		static public Map<String,Repository> list=new HashMap<String,Repository>();
 		public  int totalSamples,firstSample;
 		/**
@@ -401,7 +409,7 @@ public class Main {
 		 * Starts a sequence of state changes for Semaphore. after "time" it goes to a random but new state.
 		 */
 		static public void setRandomWithDelay(){
-			Clock  c=new Clock(ac,current.time*1000);
+			 c=new Clock(ac,current.time*1000);
 			System.out.println("Set Random With Delay " + current.time * 1000);
 			c.addMessageListener(new Bead(){
 
@@ -410,8 +418,10 @@ public class Main {
 				public void messageReceived(Bead message){
 					Clock c = (Clock)message;
 					//if (c.isBeat()) System.out.println("beat "+c.getBeatCount());
-					if (c.isBeat()&&c.getBeatCount()==1){ setRandom(); setRandomWithDelay();System.out.println("Repository set to "+current.name);
-					this.kill();
+					if (c.isBeat()&&c.getBeatCount()==1){ 
+						Repository.c.kill();
+						setRandom(); setRandomWithDelay();System.out.println("Repository set to "+current.name);
+					
 					}
 				}});
 			ac.out.addDependent(c);
@@ -452,9 +462,11 @@ public class Main {
 			
 
 			if (reverbSample!=null) reverbSample.kill();
-			float vol=granularVolume;
-			Envelope e=new Envelope(ac,vol);
+			
+			
 			int rand=(int)(Math.random()*outSampleNumber);
+			float vol=granularVolume*Repository.list.get(tagSample[rand]).volume;
+			Envelope e=new Envelope(ac,vol);
 		//	System.out.println("rhythm sample "+rand);
 			reverbSample=new ReverbSample(ac, allSamples[rand], e);	
 			granularGain.addInput(reverbSample);
