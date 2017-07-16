@@ -227,8 +227,8 @@ public Mixer(AudioContext acc,String xmlfile){
 				ac.out.addDependent(rts);
 				
 				
-				if (noRealTime) 	ac.runForNMillisecondsNonRealTime(norealTimeTime*1000); else
-					ac.start();
+			//	if (noRealTime) 	ac.runForNMillisecondsNonRealTime(norealTimeTime*1000); else
+			//		ac.start();
 				
 }
 private  boolean initialize(String xmlfile) {
