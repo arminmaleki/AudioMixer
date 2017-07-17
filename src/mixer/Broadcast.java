@@ -19,6 +19,8 @@ public class Broadcast {
 	 Gain G;
 	 float gap, interval;
 	 long tick=0;
+	 boolean processing=false;
+	 long start=System.currentTimeMillis();
 public Broadcast (AudioContext ac, int port,float interval ,float gap,float volume){
 	
     this.ac=ac;
@@ -48,7 +50,10 @@ public Broadcast (AudioContext ac, int port,float interval ,float gap,float volu
 
  public void  loop(){
 	tick++;
-	System.out.println("timer   "+tick);
+	long mytick=tick;
+	System.out.println("timer   "+(mytick-1)*(interval/1000));
+	long delay=(long) interval;
+	if (processing) delay=1000; 
 	Timer timer=new Timer();
 	timer.schedule(new TimerTask() {
 		@Override
@@ -56,12 +61,24 @@ public Broadcast (AudioContext ac, int port,float interval ,float gap,float volu
 			loop();
 
 		}
-	}, (long)interval); 
+	}, (long)delay);
+	if (processing) {
+		System.out.println("still processing, timer " + (mytick - 1) * (interval / 1000) + " canceled");
+		tick--;
+		return;	
+	}
+	
+	processing=true;
+	long now=System.currentTimeMillis()-start;
+	System.out.println("TIME " + now / 1000 + " " + (now/1000 - (mytick - 1) * (interval / 1000)));
 	rts.reset();
 	s.clear();
-	System.out.println("timer   "+tick+" is running");
+	long systime1=System.currentTimeMillis();
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" is running");
 	ac.runForNMillisecondsNonRealTime(interval-gap);
-	System.out.println("timer   "+tick+" is run");
+	long systime2=System.currentTimeMillis();
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" is run in "+(systime2-systime1)/1000.0);
+	processing=false;
 	int i;
 	/* try {
 					s.write("sample"+tick+".wav",AudioFileType.WAV);
@@ -71,7 +88,7 @@ public Broadcast (AudioContext ac, int port,float interval ,float gap,float volu
 				}*/
 
 	float[] frame=new float[2];
-	System.out.println("timer   "+tick+" data is being transformed");
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" data is being transformed");
 	byte[] buff=new byte[(int) (s.getNumFrames()*4)];
 	short sh;
 	for (i=0;i<s.getNumFrames();i++){s.getFrame(i, frame);// P.println(frame[1]);
@@ -91,7 +108,7 @@ public Broadcast (AudioContext ac, int port,float interval ,float gap,float volu
 					e.printStackTrace();
 				}*/
 	}
-	System.out.println("timer   "+tick+" data is being written");
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" data is being written");
 	try {
 		dos.write(buff);
 	} catch (IOException e) {
@@ -99,17 +116,17 @@ public Broadcast (AudioContext ac, int port,float interval ,float gap,float volu
 		e.printStackTrace();
 	}
 	//	P.close();
-	System.out.println("timer   "+tick+" data is being flushed");
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" data is being flushed");
 	try {
 		dos.flush();
 
 		//if (cs!=null) cs.close();
 	} catch (IOException e1) {
 		// TODO Auto-generated catch block
-		System.out.println("timer   "+tick+" data flushing problem");
+		System.out.println("timer   "+(mytick-1)*(interval/1000)+" data flushing problem");
 		e1.printStackTrace();
 	}
-	System.out.println("timer   "+tick+" finished");
+	System.out.println("timer   "+(mytick-1)*(interval/1000)+" finished");
 	
 };
 

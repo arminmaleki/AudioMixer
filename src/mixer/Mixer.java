@@ -100,7 +100,7 @@ public Mixer(AudioContext acc,String xmlfile){
 		public void messageReceived(Bead message){
 			Clock c = (Clock)message;
 			if(c.isBeat()){
-
+				if (c.getBeatCount()%4==0) System.out.println("Metronom beat " + c.getBeatCount()); 
 				if ((c.getBeatCount()%10==0 )&&(c.getBeatCount()>30)){
 
 					rts.pause(true);
